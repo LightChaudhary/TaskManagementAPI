@@ -5,7 +5,11 @@ class TaskCreate(BaseModel):
     description: str
     completed: bool = False
 
-
+class TaskUpdate(BaseModel):
+    title: str
+    description: str
+    completed: bool
+    
 class Task(BaseModel):
     id: int
     title: str
