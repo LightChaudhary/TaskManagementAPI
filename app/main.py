@@ -9,12 +9,14 @@ tasks = [
         "title": "learn rest",
         "description" : "understand http methods and status codes.",
         "completed": False,
+        "priority": "high",
     },
     {
         "id" : 2,
         "title": "learn git branches",
         "description": "practice feature branches and merging",
         "completed": False,
+        "priority": "medium",
     },
 ]
 
@@ -44,6 +46,7 @@ def create_task(task: TaskCreate):
         "title" : task.title,
         "description" : task.description,
         "completed" : task.completed,
+        "priority" : task.priority,
     }
     tasks.append(new_task)
 
@@ -56,8 +59,21 @@ def update_task(task_id: int, task:TaskUpdate):
             existing_task["title"] = task.title
             existing_task["description"] = task.description
             existing_task["completed"] = task.completed
+            existing_task["priority"] = task.priority
 
             return existing_task
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="task not found!",
+    )
+
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT,)
+def delete_task(task_id: int):
+    for index, task in enumerate(tasks):
+        if task["id"] == task_id:
+            tasks.pop(index)
+            return
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
