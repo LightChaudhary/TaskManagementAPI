@@ -7,7 +7,7 @@ tasks = [
     {
         "id": 1,
         "title": "learn rest",
-        "description" : "understand http methods and status codes.",
+        "description": "understand http methods and status codes.",
         "completed": False,
         "priority": "high",
     },
@@ -25,11 +25,11 @@ def root() -> dict:
     return {"message" : "Hello!, Prakash"}
 
 @app.get("/tasks", response_model=list[Task])
-def get_tasks():
+def get_tasks() -> list[Task]:
     return tasks
 
 @app.get("/tasks/{task_id}", response_model=Task)
-def get_tasks(task_id: int):
+def get_task(task_id: int) -> Task:
     for task in tasks:
         if task["id"] == task_id:
             return task
@@ -39,21 +39,21 @@ def get_tasks(task_id: int):
         detail="task not found!",
     )
 
-@app.post("/tasks", response_model=Task, status_code=status.HTTP_201_CREATED,)
-def create_task(task: TaskCreate):
+@app.post("/tasks", response_model=Task, status_code=status.HTTP_201_CREATED)
+def create_task(task: TaskCreate) -> Task:
     new_task = {
         "id" : len(tasks) + 1,
-        "title" : task.title,
-        "description" : task.description,
-        "completed" : task.completed,
-        "priority" : task.priority,
+        "title": task.title,
+        "description": task.description,
+        "completed": task.completed,
+        "priority": task.priority,
     }
     tasks.append(new_task)
 
     return new_task
 
-@app.put("/tasks/{task_id}", response_model=Task,)
-def update_task(task_id: int, task:TaskUpdate):
+@app.put("/tasks/{task_id}", response_model=Task)
+def update_task(task_id: int, task: TaskUpdate) -> Task:
     for existing_task in tasks:
         if existing_task["id"] == task_id:
             existing_task["title"] = task.title
@@ -68,8 +68,8 @@ def update_task(task_id: int, task:TaskUpdate):
         detail="task not found!",
     )
 
-@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT,)
-def delete_task(task_id: int):
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: int) -> None:
     for index, task in enumerate(tasks):
         if task["id"] == task_id:
             tasks.pop(index)
