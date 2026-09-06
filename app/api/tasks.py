@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 
 from app.models.task import tasks, next_task_id
-from app.schemas.task import TaskCreate, TaskOut
+from app.schemas.task import TaskCreate, TaskOut, TaskUpdate
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -42,3 +42,35 @@ def get_task(task_id: int) -> TaskOut:
 
     return task
 
+@router.put("/{task_id}", response_model=TaskOut)
+def update_task(task_id: int, task: TaskUpdate) -> TaskOut:
+    existing_task = tasks.get(task_id)
+
+    if existing_task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="task not found!",
+        )
+
+    existing_task.update(
+        {
+            "title": task.title,
+            "description": task.description,
+            "status": task.status,
+            "priority": task.priority,
+        }
+    )
+
+    return existing_task
+
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT,)
+def delete_task(task_id: int) -> None:
+    task = tasks.get(task_id)
+
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="task not found!",
+        )
+
+    del tasks[task_id]

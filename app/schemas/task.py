@@ -17,6 +17,12 @@ class TaskCreate(BaseModel):
     status: TaskStatus = TaskStatus.TODO
     priority: Priority = Priority.MEDIUM
 
+class TaskUpdate(BaseModel):
+    title: str
+    description: str
+    status: TaskStatus
+    priority: Priority
+
 class TaskOut(BaseModel):
     id: int
     title: str
