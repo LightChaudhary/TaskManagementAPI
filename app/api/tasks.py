@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException
 
-from app.models.task import tasks, next_task_id
+from app.models import task as task_model
 from app.schemas.task import TaskCreate, TaskOut, TaskUpdate
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
@@ -11,28 +11,26 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
     status_code=status.HTTP_201_CREATED,
 )
 def create_task(task: TaskCreate) -> TaskOut:
-    global next_task_id
-
-    new_task={
-        "id": next_task_id,
+    new_task = {
+        "id": task_model.next_task_id,
         "title": task.title,
         "description": task.description,
         "status": task.status,
         "priority": task.priority,
     }
 
-    tasks[next_task_id] = new_task
-    next_task_id += 1
+    task_model.tasks[task_model.next_task_id] = new_task
+    task_model.next_task_id += 1
 
     return new_task
 
 @router.get("", response_model=list[TaskOut])
 def get_tasks() -> list[TaskOut]:
-    return list(tasks.values())
+    return list(task_model.tasks.values())
 
 @router.get("/{task_id}", response_model=TaskOut)
 def get_task(task_id: int) -> TaskOut:
-    task = tasks.get(task_id)
+    task = task_model.tasks.get(task_id)
 
     if task is None:
         raise HTTPException(
@@ -44,7 +42,7 @@ def get_task(task_id: int) -> TaskOut:
 
 @router.put("/{task_id}", response_model=TaskOut)
 def update_task(task_id: int, task: TaskUpdate) -> TaskOut:
-    existing_task = tasks.get(task_id)
+    existing_task = task_model.tasks.get(task_id)
 
     if existing_task is None:
         raise HTTPException(
@@ -65,7 +63,7 @@ def update_task(task_id: int, task: TaskUpdate) -> TaskOut:
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT,)
 def delete_task(task_id: int) -> None:
-    task = tasks.get(task_id)
+    task = task_model.tasks.get(task_id)
 
     if task is None:
         raise HTTPException(
@@ -73,4 +71,4 @@ def delete_task(task_id: int) -> None:
             detail="task not found!",
         )
 
-    del tasks[task_id]
+    del task_model.tasks[task_id]
