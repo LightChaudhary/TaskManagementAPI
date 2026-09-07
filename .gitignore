@@ -21,3 +21,7 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# database
+tasks.db
+*.db
