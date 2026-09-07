@@ -1,18 +1,14 @@
-tasks: dict[int, dict] = {
-    1: {
-        "id": 1,
-        "title": "learn rest",
-        "description": "understand http methods and status codes.",
-        "status": "todo",
-        "priority": "high",
-    },
-    2: {
-        "id": 2,
-        "title": "learn git branches",
-        "description": "practice feature branches and merging",
-        "status": "todo",
-        "priority": "medium",
-    },
-}
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
 
-next_task_id = 3
+from app.database import Base
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String)
+    priority: Mapped[str] = mapped_column(String)
+
