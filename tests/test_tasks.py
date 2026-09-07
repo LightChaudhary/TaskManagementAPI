@@ -123,7 +123,7 @@ def test_deleted_task_is_not_found():
     assert response.status_code == 404
 
 def test_delete_nonexistent_task():
-    response = client.get("/tasks/999")
+    response = client.delete("/tasks/999")
 
     assert response.status_code == 404
     assert response.json()["detail"] == "task not found!"
