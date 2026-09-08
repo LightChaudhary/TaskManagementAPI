@@ -1,29 +1,32 @@
 import pytest
 
-from app.models import task as task_model
+from app.database import SessionLocal
+from app.models.task import Task
 
 
 @pytest.fixture(autouse=True)
 def reset_tasks():
-    task_model.tasks.clear()
+    db = SessionLocal()
 
-    task_model.tasks.update(
-        {
-            1:{
-                "id": 1,
-                "title": "learn rest",
-                "description": "understand http methods and status codes.",
-                "status": "todo",
-                "priority": "high",
-            },
-            2:{
-                "id": 2,
-                "title": "learn git branches",
-                "description": "practice feature branches and merging",
-                "status": "todo",
-                "priority": "medium",
-            },
-        }
+    db.query(Task).delete()
+
+    task1 = Task(
+        title="learn rest",
+        description="understand http methods and status codes.",
+        status="todo",
+        priority="high",
     )
 
-    task_model.next_task_id = 3
+    task2 = Task(
+        title="learn git branches",
+        description="practice feature branches and merging",
+        status="todo",
+        priority="medium",
+    )
+
+    db.add_all([task1, task2])
+    db.commit()
+
+    yield
+
+    db.close()
