@@ -1,6 +1,8 @@
 from enum import Enum
 from pydantic import BaseModel
 
+from datetime import datetime
+
 class TaskStatus(str, Enum):
     TODO = "todo"
     IN_PROGRESS = "in_progress"
@@ -29,3 +31,5 @@ class TaskOut(BaseModel):
     description: str
     status: TaskStatus
     priority: Priority
+    created_at: datetime
+    

@@ -45,6 +45,8 @@ def test_create_task():
     assert data["status"] == task_data["status"]
     assert data["priority"] == task_data["priority"]
     assert "id" in data
+    assert "created_at" in data
+    assert data["created_at"] is not None
 
 def test_create_task_with_default():
     task_data = {
@@ -73,6 +75,30 @@ def test_create_task_with_invalid_priority():
 
     assert response.status_code == 422
 
+def test_create_task_have_different_created_at():
+    task_data={
+        "title": "Task one",
+        "description": "First task",
+        "status": "todo",
+        "priority": "medium",
+    }
+
+    response_1 = client.post("/tasks", json=task_data)
+    response_2 = client.post(
+        "/tasks",
+        json={
+            **task_data,
+            "title": "Task two",
+        },
+    )
+
+    assert response_1.status_code == 201
+    assert response_2.status_code == 201
+
+    created_at_1 = response_1.json()["created_at"]
+    created_at_2 = response_2.json()["created_at"]
+
+    assert created_at_1 != created_at_2
 
 def test_update_existing_task():
     updated_data = {
