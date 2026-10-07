@@ -5,6 +5,9 @@ from app.models.task import Task
 from app.database import get_db
 from app.schemas.task import TaskCreate, TaskOut, TaskUpdate
 
+from app.repositories.task import TaskRepository
+from app.services.task import TaskService
+
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 @router.post(
@@ -12,29 +15,21 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
     response_model=TaskOut,
     status_code=status.HTTP_201_CREATED,
 )
-def create_task(task: TaskCreate, db: Session = Depends(get_db)) -> TaskOut:
-    new_task = Task(
-        title=task.title,
-        description=task.description,
-        status=task.status.value,
-        priority=task.priority.value,
-    )
-    db.add(new_task)
-    db.commit()
-    db.refresh(new_task)
-
-    return new_task
+def create_task(task: TaskCreate, db: Session = Depends(get_db),) -> TaskOut:
+    service = TaskService(TaskRepository(db))
+    return service.create_task(task)
 
 @router.get("", response_model=list[TaskOut])
-def get_tasks(db: Session = Depends(get_db)) -> list[TaskOut]:
-    tasks = db.query(Task).all()
-
-    return tasks
+def get_tasks(db: Session = Depends(get_db),) -> list[TaskOut]:
+    service = TaskService(TaskRepository(db))
+    return service.get_tasks()
 
 @router.get("/{task_id}", response_model=TaskOut)
 def get_task(task_id: int, db: Session = Depends(get_db),) -> TaskOut:
-    task = db.get(Task, task_id)
+    service = TaskService(TaskRepository(db))
 
+    task = service.get_task(task_id)
+    
     if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -44,34 +39,27 @@ def get_task(task_id: int, db: Session = Depends(get_db),) -> TaskOut:
     return task
 
 @router.put("/{task_id}", response_model=TaskOut)
-def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)) -> TaskOut:
-    existing_task = db.get(Task, task_id)
+def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db),) -> TaskOut:
+    service = TaskService(TaskRepository(db))
 
-    if existing_task is None:
+    updated_task = service.update_task(task_id, task)
+
+    if updated_task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="task not found!",
         )
 
-    existing_task.title = task.title
-    existing_task.description = task.description
-    existing_task.status = task.status.value
-    existing_task.priority = task.priority.value
-
-    db.commit()
-    db.refresh(existing_task)
-
-    return existing_task
+    return updated_task
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT,)
-def delete_task(task_id: int, db: Session = Depends(get_db)) -> None:
-    task = db.get(Task, task_id)
+def delete_task(task_id: int, db: Session = Depends(get_db),) -> None:
+    service = TaskService(TaskRepository(db))
 
-    if task is None:
+    deleted = service.delete_task(task_id)
+
+    if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="task not found!",
         )
-
-    db.delete(task)
-    db.commit()
