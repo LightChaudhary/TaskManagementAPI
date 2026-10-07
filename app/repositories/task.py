@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
 
 from app.models.task import Task
+from app.repositories.base import TaskRepositoryInterface
 
-class TaskRepository:
+class TaskRepository(TaskRepositoryInterface):
     def __init__(self, db: Session):
         self.db = db
 
