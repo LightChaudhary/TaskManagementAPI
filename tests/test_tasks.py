@@ -26,6 +26,51 @@ def test_get_nonexistent_task():
     assert response.status_code == 404
     assert response.json()["detail"] == "task not found!"
 
+def test_get_tasks_filter_by_status():
+    response = client.get("/tasks?status=todo")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 2
+    assert all(task["status"] == "todo" for task in data)
+
+def test_get_tasks_filter_by_priority():
+    response = client.get("/tasks?priority=high")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["priority"] == "high"
+
+def test_get_tasks_pagination():
+    response = client.get("/tasks?skip=0&limit=1")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+
+def test_get_tasks_invalid_pagination():
+    response = client.get("/tasks?limit=101")
+
+    assert response.status_code == 422
+
+def test_get_tasks_combined_filters():
+    response = client.get("/tasks?status=todo&priority=high")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["status"] == "todo"
+    assert data[0]["priority"] == "high"
+
 def test_create_task():
     task_data = {
         "title": "Learn pytest",

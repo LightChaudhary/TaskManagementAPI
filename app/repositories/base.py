@@ -10,7 +10,13 @@ class TaskRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_all(self) -> list[Task]:
+    def get_all(
+        self,
+        status: str | None = None,
+        priority: str | None = None,
+        skip: int = 0,
+        limit: int = 20,
+    ) -> list[Task]:
         pass
 
     @abstractmethod

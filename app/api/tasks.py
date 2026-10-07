@@ -1,7 +1,7 @@
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException, Depends, Query
 
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskOut, TaskUpdate
+from app.schemas.task import TaskCreate, TaskOut, TaskUpdate, TaskStatus, Priority
 
 from app.services.task import TaskService
 from app.dependencies import get_task_service
@@ -17,8 +17,19 @@ def create_task(task: TaskCreate, service: TaskService = Depends(get_task_servic
     return service.create_task(task)
 
 @router.get("", response_model=list[TaskOut])
-def get_tasks(service: TaskService = Depends(get_task_service),) -> list[TaskOut]:
-    return service.get_tasks()
+def get_tasks(
+    status_filter: TaskStatus | None = Query(default=None, alias="status"),
+    priority_filter: Priority | None = Query(default=None, alias="priority"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    service: TaskService = Depends(get_task_service),
+) -> list[TaskOut]:
+    return service.get_tasks(
+        status=status_filter,
+        priority=priority_filter,
+        skip=skip,
+        limit=limit,
+    )
 
 @router.get("/{task_id}", response_model=TaskOut)
 def get_task(task_id: int, service: TaskService = Depends(get_task_service),) -> TaskOut:

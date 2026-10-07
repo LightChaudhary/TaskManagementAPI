@@ -1,6 +1,6 @@
 from app.models.task import Task
 from app.repositories.task import TaskRepository
-from app.schemas.task import TaskCreate, TaskUpdate
+from app.schemas.task import TaskCreate, TaskUpdate, TaskStatus, Priority
 
 class TaskService:
     def __init__(self, repository: TaskRepository):
@@ -16,8 +16,19 @@ class TaskService:
 
         return self.repository.create(task)
 
-    def get_tasks(self) -> list[Task]:
-        return self.repository.get_all()
+    def get_tasks(
+        self,
+        status: TaskStatus | None = None,
+        priority: Priority | None = None,
+        skip: int = 0,
+        limit: int = 20,
+    ) -> list[Task]:
+        return self.repository.get_all(
+            status=status.value if status else None,
+            priority=priority.value if priority else None,
+            skip=skip,
+            limit=limit,
+        )
 
     def get_task(self, task_id: int) -> Task | None:
         return self.repository.get_by_id(task_id)
