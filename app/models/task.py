@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -15,5 +15,9 @@ class Task(Base):
     priority: Mapped[str] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(
         default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
         nullable=False,
     )

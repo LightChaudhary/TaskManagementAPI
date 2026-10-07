@@ -13,11 +13,15 @@ class TaskRepository(TaskRepositoryInterface):
         self.db.refresh(task)
         return task
 
-    def get_all(self, status: str|None = None,
-                priority:str| None=None,
-                skip:int = 0,
-                limit:int = 20,) -> list[Task]:
-        query = self.db.query(Task)
+    def get_all(
+        self,
+        owner_id: int,
+        status: str | None = None,
+        priority: str | None = None,
+        skip: int = 0,
+        limit: int = 20,
+    ) -> list[Task]:
+        query = self.db.query(Task).filter(Task.owner_id == owner_id)
 
         if status is not None:
             query = query.filter(Task.status == status)
@@ -27,8 +31,19 @@ class TaskRepository(TaskRepositoryInterface):
 
         return query.offset(skip).limit(limit).all()
 
-    def get_by_id(self, task_id: int) -> Task | None:
-        return self.db.get(Task, task_id)
+    def get_by_id(
+        self,
+        task_id: int,
+        owner_id: int,
+    ) -> Task | None:
+        return (
+            self.db.query(Task)
+            .filter(
+                Task.id == task_id,
+                Task.owner_id == owner_id,
+            )
+            .first()
+        )
 
     def update(self, task: Task) -> Task:
         self.db.commit()

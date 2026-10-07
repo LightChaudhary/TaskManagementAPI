@@ -12,6 +12,7 @@ class TaskRepositoryInterface(ABC):
     @abstractmethod
     def get_all(
         self,
+        owner_id: int,
         status: str | None = None,
         priority: str | None = None,
         skip: int = 0,
@@ -20,7 +21,11 @@ class TaskRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, task_id: int) -> Task | None:
+    def get_by_id(
+        self,
+        task_id: int,
+        owner_id: int,
+    ) -> Task | None:
         pass
 
     @abstractmethod
